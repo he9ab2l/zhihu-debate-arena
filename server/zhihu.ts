@@ -45,21 +45,6 @@ export type HotItem = { title: string; url: string; summary: string; thumbnailUr
 const API_BASE = "https://developer.zhihu.com";
 const DEFAULT_TIMEOUT_MS = 12_000;
 
-const DEMO_TOPICS = [
-  {
-    title: "AI 时代，普通人应该先做产品还是先补系统知识？",
-    summary: "一边是快速交付与真实反馈，一边是长期能力与方法论积累。",
-  },
-  {
-    title: "第一份工作，要优先选择成长速度还是生活确定性？",
-    summary: "选择的关键不只是薪资，还包括容错空间、迁移能力与个人阶段。",
-  },
-  {
-    title: "大学生是否应该把时间投入到一个长期副业？",
-    summary: "短期机会成本与长期复利之间，如何做出可承受的试验。",
-  },
-];
-
 function accessSecret() {
   const value = process.env.ZHIHU_ACCESS_SECRET?.trim();
   return value || null;
@@ -141,7 +126,7 @@ export async function searchZhihu(topic: string, count = 8) {
 }
 
 export async function fetchHot(limit = 12) {
-  if (!accessSecret()) return { ok: false as const, reason: "missing_secret", items: DEMO_TOPICS.map((item, index) => ({ ...item, url: `https://www.zhihu.com/search?q=${encodeURIComponent(item.title)}`, thumbnailUrl: "", rank: index + 1 })) };
+  if (!accessSecret()) return { ok: false as const, reason: "missing_secret", items: [] };
   const result = await requestJson(`/api/v1/content/hot_list?Limit=${Math.min(Math.max(limit, 1), 30)}`);
   if (!result.ok) return { ok: false as const, reason: result.reason, items: [] };
   const rawItems = Array.isArray(result.body?.Data?.Items) ? result.body.Data.Items : [];
@@ -196,7 +181,7 @@ export function buildDebate(topic: string, items: Evidence[]): DebateBrief {
   const conIds = challenge.map(item => item.id);
   const sourceNote = live
     ? "本次辩题由知乎开放平台站内搜索结果整理。左右两侧是阅读视角，不等同于原作者自称的立场；请打开原文核验上下文。"
-    : "当前为可交互演示模式：未配置 Access Secret 或站内搜索暂不可用，因此不展示伪造的知乎论据。配置凭证后重新生成即可获得真实来源。";
+    : "未获得真实知乎检索结果，因此不会生成或展示演示辩题，也不展示伪造的知乎论据。配置凭证并完成检索后才能保存真实来源。";
   const proFallback = `支持“${normalizedTopic}”的人，通常看重上限、主动权与可验证的增量。真正的分歧不是要不要行动，而是试错成本是否可控。`;
   const conFallback = `质疑“${normalizedTopic}”的人，通常先问下限、不可逆损失与机会成本。谨慎不是拒绝变化，而是要求先把最坏情况说清楚。`;
   const proClaim = support[0]?.excerpt || proFallback;
@@ -233,10 +218,6 @@ export function buildDebate(topic: string, items: Evidence[]): DebateBrief {
   };
 }
 
-export function demoBriefs() {
-  return DEMO_TOPICS.slice(0, 2).map(item => buildDebate(item.title, []));
-}
-
 export function hasSecret() {
   return Boolean(accessSecret());
 }
@@ -245,6 +226,6 @@ export function sourceStatus() {
   return {
     configured: hasSecret(),
     provider: "知乎开放平台 HTTP API",
-    note: hasSecret() ? "服务端已配置 Access Secret；凭证不会返回浏览器。" : "未配置 Access Secret；当前仅展示无伪造证据的演示框架。",
+    note: hasSecret() ? "服务端已配置 Access Secret；凭证不会返回浏览器。" : "未配置 Access Secret；当前只能浏览已保存结果，无法发起真实检索。",
   };
 }
