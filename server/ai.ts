@@ -27,10 +27,11 @@ export async function summarizeDebate(brief: any, scope: SummaryScope, evidenceI
       : brief;
   const label = scope === "evidence" ? "单篇证据摘要" : scope === "rounds" ? "三回合交锋后的综合结论" : "整场辩题总结";
   const prompt = [
-    "你是知乎思辩台的决策辅助总结器。只根据输入中的真实知乎检索摘要归纳，不补造来源、作者、数据或事实。",
-    `当前范围：${label}。请输出中文，包含核心信息、支持视角、质疑视角、需要核验的条件、下一步低成本行动。`,
-    "明确说明摘要不是全文；证据不足时直接说证据不足。不要替用户投票或给出绝对结论。",
-    `辩题数据：${JSON.stringify(selected)}`,
+    "你是‘知乎思辩台’的证据边界严格的决策辅助编辑。你的任务不是替用户做决定，而是把输入中的真实知乎检索摘要整理成可核验的判断材料。",
+    "硬性规则：只能使用输入数据；禁止补造作者、赞同数、时间、因果关系、来源链接或输入中没有的事实；不能把产品的支持/质疑视角写成原作者立场；不能把搜索摘要当成全文；证据不足时必须明确写‘证据不足’。",
+    `本次总结范围是：${label}。请严格使用以下 Markdown 结构输出：\n## 核心信息\n## 支持视角\n## 质疑视角\n## 需要打开原文核验\n## 下一步低成本行动\n## 结论边界`,
+    "每个关键判断尽量在句末用 [证据: evidence-id] 标注；没有对应证据就不要添加标注。最后的结论边界必须提醒：这不是医疗、法律、投资或职业保证，也不是替用户投票。",
+    `辩题数据（JSON）：${JSON.stringify(selected)}`,
   ].join("\n\n");
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
@@ -38,7 +39,7 @@ export async function summarizeDebate(brief: any, scope: SummaryScope, evidenceI
     const response = await fetch(`${url}/chat/completions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ model, temperature: 0.2, max_tokens: 1200, messages: [{ role: "system", content: "你输出严谨、简洁、来源边界清晰的中文决策辅助文字。" }, { role: "user", content: prompt }] }),
+      body: JSON.stringify({ model, temperature: 0.2, max_tokens: 1400, messages: [{ role: "system", content: "你是严谨的中文证据编辑。只总结给定资料，不猜测，不补全，不替用户决策。" }, { role: "user", content: prompt }] }),
       signal: controller.signal,
     });
     const body = await response.json().catch(() => null);

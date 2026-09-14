@@ -130,7 +130,7 @@ button:not(:disabled), a[href] { cursor: pointer; }
 .brief-actions button:hover { background: var(--paper-2); }
 .button-count { font: 10px 'DM Mono', monospace; background: var(--paper-2); padding: 2px 5px; border-radius: 4px; }
 
-.thesis-grid { display: grid; grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr); align-items: stretch; gap: 0; margin-bottom: 65px; }
+.thesis-grid { display: grid; grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr); align-items: stretch; gap: 0; margin-bottom: 65px; }
 .thesis-card { position: relative; min-height: 191px; border-radius: 8px; padding: 23px 24px; overflow: hidden; transition: transform .2s var(--ease-out); }
 .thesis-card:hover { transform: translateY(-3px); }
 .thesis-pro { color: #263862; background: var(--pro-soft); }
@@ -141,8 +141,8 @@ button:not(:disabled), a[href] { cursor: pointer; }
 .thesis-card h3 { margin: 38px 0 8px; font-size: 23px; letter-spacing: -.05em; }
 .thesis-card p { margin: 0; font-size: 12px; line-height: 1.75; max-width: 365px; opacity: .88; }
 .card-arrow { position: absolute; bottom: 20px; right: 22px; opacity: .55; }
-.versus { position: relative; display: grid; place-items: center; color: var(--ink-soft); font: 500 10px 'DM Mono', monospace; }
-.versus i { position: absolute; left: 50%; top: 33px; bottom: 33px; border-left: 1px dashed var(--line); z-index: -1; }
+.versus { position: relative; display: grid; place-items: center; color: var(--ink-soft); font: 500 8px 'DM Mono', monospace; }
+.versus i { display: none; }
 .versus span { background: var(--paper); padding: 7px 0; }
 
 .section-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
@@ -158,7 +158,7 @@ button:not(:disabled), a[href] { cursor: pointer; }
 .round-number { font: 500 24px/.95 'DM Mono', monospace; color: var(--accent); opacity: .8; }
 .round-intro h4 { margin: 0 0 4px; font-size: 14px; }
 .round-intro p { margin: 0; color: var(--ink-soft); font-size: 12px; }
-.exchange-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.exchange-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; max-height: 430px; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; }
 .argument-card { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 19px 20px 15px; min-height: 170px; display: flex; flex-direction: column; }
 .argument-card p { font-size: 14px; line-height: 1.75; margin: 22px 0 22px; flex: 1; }
 .argument-pro { border-top: 3px solid var(--pro); }
@@ -203,6 +203,8 @@ button:not(:disabled), a[href] { cursor: pointer; }
 .source-fab:hover { border-color: var(--accent); }
 
 .sheet-note { display: flex; gap: 8px; align-items: flex-start; color: var(--ink-soft); background: var(--paper); padding: 12px; border-radius: 7px; font-size: 11px; line-height: 1.6; margin: 18px 0; }
+[data-slot="sheet-content"] { background: var(--card); color: var(--ink); border-color: var(--line); }
+[data-slot="sheet-overlay"] { background: rgba(25, 24, 20, .38); }
 .evidence-sheet { width: min(480px, 100vw); overflow-y: auto; }
 .evidence-sheet [data-slot=sheet-title], .hot-sheet [data-slot=sheet-title] { display: flex; align-items: center; gap: 7px; }
 .evidence-sheet [data-slot=sheet-title] span { color: var(--ink-soft); font: 10px 'DM Mono', monospace; font-weight: 400; }
@@ -257,6 +259,7 @@ button:not(:disabled), a[href] { cursor: pointer; }
   .sidebar-visible .sidebar-panel { transform: translateX(0); }
   .sidebar-collapsed .sidebar-panel { transform: translateX(-105%); }
   .mobile-sidebar-button { display: inline-grid; }
+  .sidebar-toggle { display: none; }
   .main-panel { padding: 48px 24px 70px; }
   .topbar-inner { padding: 0 20px; }
   .hero-block h1 { font-size: 40px; }
@@ -264,6 +267,8 @@ button:not(:disabled), a[href] { cursor: pointer; }
 }
 @media (min-width: 901px) {
   .mobile-sidebar-button { display: none; }
+  .sidebar-collapsed .mobile-sidebar-button { display: inline-grid; }
+  .sidebar-toggle { display: grid; }
   .sidebar-collapsed .workspace { grid-template-columns: 0 minmax(0, 1fr); }
   .sidebar-collapsed .sidebar-panel { width: 0; padding: 0; border-right: 0; overflow: hidden; }
 }

@@ -61,13 +61,14 @@ export const appRouter = router({
       if (!canCreate(ctx.req)) throw new Error("请求过于频繁，请稍后再试。");
       const search = await searchZhihu(input.topic, 8);
       if (!search.ok) throw new Error(`知乎检索失败（${search.reason}），未生成无来源的演示结果。`);
+      if (search.items.length === 0) throw new Error("知乎检索没有返回可核验来源，未生成辩题。");
       const brief = buildDebate(input.topic, search.items);
       const ownerOpenId = ctx.user?.openId ?? null;
       await insertDebate({ id: brief.id, topic: brief.topic, source: brief.source, ownerOpenId, payload: JSON.stringify(brief) });
       return { brief, search: { available: search.ok, reason: search.reason, count: search.items.length } };
     }),
 
-    summarize: protectedProcedure.input(z.object({ id: z.string().min(1).max(64), scope: z.enum(["evidence", "debate", "rounds"]), evidenceId: z.string().max(128).optional() })).mutation(async ({ input }) => {
+    summarize: publicProcedure.input(z.object({ id: z.string().min(1).max(64), scope: z.enum(["evidence", "debate", "rounds"]), evidenceId: z.string().max(128).optional() })).mutation(async ({ input }) => {
       const row = await getPersistedDebate(input.id);
       const brief = row ? hydrate(row) : null;
       if (!brief || brief.source !== "zhihu") throw new Error("只能总结已保存的真实知乎辩题。");

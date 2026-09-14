@@ -18,7 +18,7 @@ export type Evidence = {
 export type DebateBrief = {
   id: string;
   topic: string;
-  source: "zhihu" | "demo";
+  source: "zhihu";
   generatedAt: string;
   sourceNote: string;
   question: string;
@@ -174,27 +174,24 @@ function evidenceFor(items: Evidence[], perspective: Evidence["perspective"]) {
 
 export function buildDebate(topic: string, items: Evidence[]): DebateBrief {
   const normalizedTopic = compactTopic(topic);
-  const live = items.length > 0;
+  if (items.length === 0) throw new Error("没有真实知乎证据，不能生成辩题。");
   const support = evidenceFor(items, "支持视角");
   const challenge = evidenceFor(items, "质疑视角");
   const proIds = support.map(item => item.id);
   const conIds = challenge.map(item => item.id);
-  const sourceNote = live
-    ? "本次辩题由知乎开放平台站内搜索结果整理。左右两侧是阅读视角，不等同于原作者自称的立场；请打开原文核验上下文。"
-    : "未获得真实知乎检索结果，因此不会生成或展示演示辩题，也不展示伪造的知乎论据。配置凭证并完成检索后才能保存真实来源。";
-  const proFallback = `支持“${normalizedTopic}”的人，通常看重上限、主动权与可验证的增量。真正的分歧不是要不要行动，而是试错成本是否可控。`;
-  const conFallback = `质疑“${normalizedTopic}”的人，通常先问下限、不可逆损失与机会成本。谨慎不是拒绝变化，而是要求先把最坏情况说清楚。`;
-  const proClaim = support[0]?.excerpt || proFallback;
-  const conClaim = challenge[0]?.excerpt || conFallback;
+  const sourceNote = "本次辩题由知乎开放平台站内搜索结果整理。左右两侧是阅读视角，不等同于原作者自称的立场；请打开原文核验上下文。";
+  const insufficient = "当前检索结果没有足够的该视角摘要；请打开原文核验，或换一个更具体的议题重新检索。";
+  const proClaim = support[0]?.excerpt || insufficient;
+  const conClaim = challenge[0]?.excerpt || insufficient;
   const rounds = [
     { name: "立论", prompt: "先明确你愿意为哪一个结果下注。", pro: { claim: proClaim, evidenceIds: proIds.slice(0, 1) }, con: { claim: conClaim, evidenceIds: conIds.slice(0, 1) } },
-    { name: "攻防", prompt: "把对方的隐含前提翻出来，再检查它是否适合你的处境。", pro: { claim: support[1]?.excerpt || "如果所有风险都要等到确定后才行动，就很难获得新的信息。", evidenceIds: proIds.slice(1, 2) }, con: { claim: challenge[1]?.excerpt || "如果一次选择的退出成本很高，就应该把小规模验证放在前面。", evidenceIds: conIds.slice(1, 2) } },
-    { name: "终局", prompt: "把观点转换成今天能执行的判断条件，而不是替你做决定。", pro: { claim: support[2]?.excerpt || "把选择拆成可逆的小步骤，主动侧的价值才不会变成冲动。", evidenceIds: proIds.slice(2, 3) }, con: { claim: challenge[2]?.excerpt || "先设定止损线、时间盒和复盘点，稳健侧才不会滑向停滞。", evidenceIds: conIds.slice(2, 3) } },
+    { name: "攻防", prompt: "把对方的隐含前提翻出来，再检查它是否适合你的处境。", pro: { claim: support[1]?.excerpt || insufficient, evidenceIds: proIds.slice(1, 2) }, con: { claim: challenge[1]?.excerpt || insufficient, evidenceIds: conIds.slice(1, 2) } },
+    { name: "终局", prompt: "把观点转换成今天能执行的判断条件，而不是替你做决定。", pro: { claim: support[2]?.excerpt || insufficient, evidenceIds: proIds.slice(2, 3) }, con: { claim: challenge[2]?.excerpt || insufficient, evidenceIds: conIds.slice(2, 3) } },
   ];
   return {
     id: makeId(),
     topic,
-    source: live ? "zhihu" : "demo",
+    source: "zhihu",
     generatedAt: new Date().toISOString(),
     sourceNote,
     question: `关于“${normalizedTopic}”，什么条件下值得选择？`,
@@ -202,9 +199,7 @@ export function buildDebate(topic: string, items: Evidence[]): DebateBrief {
     rounds,
     evidence: items,
     synthesis: {
-      summary: live
-        ? `围绕“${normalizedTopic}”的检索结果呈现出两种稳定张力：一侧强调增量与主动权，另一侧强调容错与退出成本。更可靠的结论不是简单投票，而是把你的资源、时间和最坏情况代入。`
-        : `“${normalizedTopic}”没有脱离个人处境的标准答案。这个演示先提供一套可复用的拆解框架；连接知乎开放平台后，系统会把真实检索结果放入证据层。`,
+      summary: `围绕“${normalizedTopic}”的检索结果呈现出两种稳定张力：一侧强调增量与主动权，另一侧强调容错与退出成本。更可靠的结论不是简单投票，而是把你的资源、时间和最坏情况代入。`,
       decisionChecks: [
         "如果选择失败，损失是否可逆？多久能回到原点？",
         "你当前拥有多长的时间、现金流和支持网络作为安全垫？",

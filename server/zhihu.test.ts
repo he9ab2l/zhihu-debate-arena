@@ -2,13 +2,8 @@ import { describe, expect, it } from "vitest";
 import { buildDebate, sourceStatus } from "./zhihu";
 
 describe("知乎思辩台辩题生成器", () => {
-  it("在没有真实搜索结果时明确标记为演示模式且不伪造证据", () => {
-    const brief = buildDebate("普通人要不要读研", []);
-    expect(brief.source).toBe("demo");
-    expect(brief.evidence).toEqual([]);
-    expect(brief.sourceNote).toContain("不展示伪造的知乎论据");
-    expect(brief.rounds).toHaveLength(3);
-    expect(brief.synthesis.decisionChecks.length).toBeGreaterThan(1);
+  it("在没有真实搜索结果时拒绝生成演示辩题", () => {
+    expect(() => buildDebate("普通人要不要读研", [])).toThrow("没有真实知乎证据");
   });
 
   it("将真实搜索结果保留原文链接并生成可核验来源", () => {
