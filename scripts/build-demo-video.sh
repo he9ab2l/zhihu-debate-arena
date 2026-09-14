@@ -6,10 +6,10 @@ OUT="$ROOT/docs/zhihu-debate-arena-demo.mp4"
 FONT="/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
 mkdir -p "$ROOT/docs"
 ffmpeg -y \
-  -loop 1 -t 4 -i "$ASSETS/debate-arena-cover.png" \
+  -loop 1 -t 4 -i "$ASSETS/debate-arena-cover.jpg" \
   -loop 1 -t 6 -i "$ASSETS/debate-arena-desktop.png" \
   -loop 1 -t 5 -i "$ASSETS/debate-arena-mobile.png" \
-  -loop 1 -t 6 -i "$ASSETS/debate-arena-cover.png" \
+  -loop 1 -t 6 -i "$ASSETS/debate-arena-cover.jpg" \
   -filter_complex "
     [0:v]scale=1280:720,setsar=1,format=yuv420p,fade=t=in:st=0:d=0.45,fade=t=out:st=3.3:d=0.7,drawtext=fontfile=$FONT:text='真实来源 · 结构化交锋 · AI 辅助总结':fontcolor=white:fontsize=28:x=64:y=650:alpha=0.95[v0];
     [1:v]scale=1280:720,setsar=1,format=yuv420p,fade=t=in:st=0:d=0.45,fade=t=out:st=5.3:d=0.7,drawtext=fontfile=$FONT:text='01 真实检索与历史辩题':fontcolor=white:fontsize=26:box=1:boxcolor=black@0.48:boxborderw=14:x=54:y=54[v1];

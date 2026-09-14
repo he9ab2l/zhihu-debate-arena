@@ -13,8 +13,8 @@
 | 产品说明 | `docs/PRODUCT_PLAN.md` |
 | 桌面截图 | `docs/assets/debate-arena-desktop.png` |
 | 移动截图 | `docs/assets/debate-arena-mobile.png` |
-| 封面建议 | `docs/assets/debate-arena-cover.png` |
-| Icon 建议 | `docs/assets/debate-arena-icon.png` |
+| 封面建议 | `docs/assets/debate-arena-cover.jpg` |
+| Icon 建议 | `docs/assets/debate-arena-icon.jpg` |
 
 ## 作品简介
 
