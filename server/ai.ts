@@ -1,4 +1,4 @@
-const DEFAULT_TIMEOUT_MS = 30_000;
+const DEFAULT_TIMEOUT_MS = 90_000;
 
 type SummaryScope = "evidence" | "debate" | "rounds";
 
@@ -17,14 +17,45 @@ export function aiStatus() {
   return { configured: Boolean(url && key && model && provider), provider, model: model || null };
 }
 
+function clip(value: unknown, limit: number) {
+  const text = typeof value === "string" ? value : "";
+  return text.length > limit ? `${text.slice(0, limit)}…` : text;
+}
+
+function compactBrief(brief: any) {
+  const evidence = (brief.evidence ?? []).map((item: any) => ({
+    id: item.id,
+    title: clip(item.title, 120),
+    perspective: item.perspective,
+    authorName: clip(item.authorName, 60),
+    excerpt: clip(item.excerpt, 520),
+  }));
+  const rounds = (brief.rounds ?? []).map((round: any) => ({
+    name: round.name,
+    prompt: clip(round.prompt, 180),
+    pro: { claim: clip(round.pro?.claim, 520), evidenceIds: round.pro?.evidenceIds ?? [] },
+    con: { claim: clip(round.con?.claim, 520), evidenceIds: round.con?.evidenceIds ?? [] },
+  }));
+  return {
+    topic: clip(brief.topic, 240),
+    question: clip(brief.question, 300),
+    thesis: brief.thesis,
+    rounds,
+    evidence,
+    decisionChecks: brief.synthesis?.decisionChecks ?? [],
+    unresolved: brief.synthesis?.unresolved ?? [],
+  };
+}
+
 export async function summarizeDebate(brief: any, scope: SummaryScope, evidenceId?: string) {
   const { url, key, model } = config();
   if (!url || !key || !model) return { ok: false as const, reason: "missing_ai_config" };
+  const compact = compactBrief(brief);
   const selected = scope === "evidence"
-    ? { topic: brief.topic, evidence: (brief.evidence ?? []).filter((item: any) => !evidenceId || item.id === evidenceId) }
+    ? { topic: compact.topic, evidence: compact.evidence.filter((item: any) => !evidenceId || item.id === evidenceId) }
     : scope === "rounds"
-      ? { topic: brief.topic, thesis: brief.thesis, rounds: brief.rounds, evidence: brief.evidence }
-      : brief;
+      ? { topic: compact.topic, thesis: compact.thesis, rounds: compact.rounds, evidence: compact.evidence }
+      : compact;
   const label = scope === "evidence" ? "单篇证据摘要" : scope === "rounds" ? "三回合交锋后的综合结论" : "整场辩题总结";
   const prompt = [
     "你是‘知乎思辩台’的证据边界严格的决策辅助编辑。你的任务不是替用户做决定，而是把输入中的真实知乎检索摘要整理成可核验的判断材料。",
@@ -39,7 +70,7 @@ export async function summarizeDebate(brief: any, scope: SummaryScope, evidenceI
     const response = await fetch(`${url}/chat/completions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ model, temperature: 0.2, max_tokens: 1400, messages: [{ role: "system", content: "你是严谨的中文证据编辑。只总结给定资料，不猜测，不补全，不替用户决策。" }, { role: "user", content: prompt }] }),
+      body: JSON.stringify({ model, temperature: 0.2, max_tokens: 900, messages: [{ role: "system", content: "你是严谨的中文证据编辑。只总结给定资料，不猜测，不补全，不替用户决策。" }, { role: "user", content: prompt }] }),
       signal: controller.signal,
     });
     const body = await response.json().catch(() => null);
