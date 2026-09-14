@@ -24,7 +24,9 @@
 
 ### 产品演示视频
 
-[播放或下载中文产品演示视频](docs/zhihu-debate-arena-demo.mp4)
+[播放或下载中文产品演示视频](https://files.manuscdn.com/user_upload_by_module/session_file/310519663938741956/BChLOTwvQISTOVpS.mp4)
+
+仓库内同时保留视频文件：`docs/zhihu-debate-arena-demo.mp4`。
 
 视频内容包括：输入议题、双方视角、三回合交锋、证据库、数据源透明状态与行动前检查清单。
 

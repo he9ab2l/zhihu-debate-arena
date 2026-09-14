@@ -9,7 +9,7 @@
 | 一句话介绍 | 用真实知乎讨论拆解一个议题的两面，把观点交锋变成可执行的判断条件。 |
 | 在线作品链接 | https://3000-ip6lhwt15g4ve2pkznobs-45140197.sg2.manus.computer |
 | GitHub 链接 | https://github.com/he9ab2l/zhihu-debate-arena |
-| 产品演示视频 | `docs/zhihu-debate-arena-demo.mp4` |
+| 产品演示视频 | [公开视频直链](https://files.manuscdn.com/user_upload_by_module/session_file/310519663938741956/BChLOTwvQISTOVpS.mp4)；仓库内文件 `docs/zhihu-debate-arena-demo.mp4` |
 | 产品说明计划书 | `docs/PRODUCT_PLAN.md` |
 
 ## 作品简介（约 100 字）
